@@ -1,25 +1,26 @@
 'use strict';
+const userManager = require('../business/user.manager');
+const joiSchema = require('../joi.schema');
 var id = 1;
-const users = [{id : id++, name: "Andrzej"}];
+
+const users = [{id: id++, name: "Andrzej"}];
 
 module.exports = function (server)
 {
     server.route({
         method: 'GET', path: '/api/user', handler: function (request, reply)
         {
-            reply({
-                result: users
-            })
+            const users = userManager.query();
+            reply(users);
         }
     });
     server.route({
-        method: 'POST', path: '/api/user', handler: function (request, reply)
+        method: 'POST', path: '/api/user', config: {
+            validate: {payload: joiSchema.post}
+        }, handler: function (request, reply)
         {
-            users.push({id: id++, name: request.payload.name});
-            reply({
-
-                result: users
-            })
+            userManager.createUser(request.payload);
+            reply();
         }
     });
 };
